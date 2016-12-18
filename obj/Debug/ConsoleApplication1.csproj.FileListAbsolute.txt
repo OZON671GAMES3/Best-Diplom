@@ -4,3 +4,9 @@ C:\Users\Amanda\Documents\Visual Studio 2015\Projects\ConsoleApplication1\bin\De
 C:\Users\Amanda\Documents\Visual Studio 2015\Projects\ConsoleApplication1\obj\Debug\ConsoleApplication1.csprojResolveAssemblyReference.cache
 C:\Users\Amanda\Documents\Visual Studio 2015\Projects\ConsoleApplication1\obj\Debug\ConsoleApplication1.exe
 C:\Users\Amanda\Documents\Visual Studio 2015\Projects\ConsoleApplication1\obj\Debug\ConsoleApplication1.pdb
+C:\Users\Amanda\Best-Diplom\bin\Debug\ConsoleApplication1.exe.config
+C:\Users\Amanda\Best-Diplom\obj\Debug\ConsoleApplication1.exe
+C:\Users\Amanda\Best-Diplom\obj\Debug\ConsoleApplication1.pdb
+C:\Users\Amanda\Best-Diplom\obj\Debug\ConsoleApplication1.csprojResolveAssemblyReference.cache
+C:\Users\Amanda\Best-Diplom\bin\Debug\ConsoleApplication1.exe
+C:\Users\Amanda\Best-Diplom\bin\Debug\ConsoleApplication1.pdb
