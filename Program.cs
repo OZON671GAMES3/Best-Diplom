@@ -379,7 +379,7 @@ namespace ConsoleApplication1
                 if (t + H > tn)
                 { H = tn - t; };
 
-                halfH = H / 2;
+                halfH = H / 2.0;
                 k.pos._1 = Koordinata(output.v._1);   ///Координаты
                 k.pos._2 = Koordinata(output.v._2);
                 k.pos._3 = Koordinata(output.v._3);
@@ -419,24 +419,24 @@ namespace ConsoleApplication1
                 k4.v._3 = Skorost(output.pos._3 + k3.pos._3 * H, R) + Vozmysheniya(t, 2, k3.pos, DE405, jdate);
 
                 /// Перещет скоростей и координат
-                output.pos._1 = recalculation(output.pos._1, k.pos._1, k2.pos._1, k3.pos._1, k4.pos._1, H / 6);
-                output.pos._2 = recalculation(output.pos._2, k.pos._2, k2.pos._2, k3.pos._2, k4.pos._2, H / 6);
-                output.pos._3 = recalculation(output.pos._3, k.pos._3, k2.pos._3, k3.pos._3, k4.pos._3, H / 6);
+                output.pos._1 = recalculation(output.pos._1, k.pos._1, k2.pos._1, k3.pos._1, k4.pos._1, H / 6.0);
+                output.pos._2 = recalculation(output.pos._2, k.pos._2, k2.pos._2, k3.pos._2, k4.pos._2, H / 6.0);
+                output.pos._3 = recalculation(output.pos._3, k.pos._3, k2.pos._3, k3.pos._3, k4.pos._3, H / 6.0);
 
-                output.v._1 = recalculation(output.v._1, k.v._1, k2.v._1, k3.v._1, k4.v._1, H / 6);
-                output.v._2 = recalculation(output.v._2, k.v._2, k2.v._2, k3.v._2, k4.v._2, H / 6);
-                output.v._3 = recalculation(output.v._3, k.v._3, k2.v._3, k3.v._3, k4.v._3, H / 6);
+                output.v._1 = recalculation(output.v._1, k.v._1, k2.v._1, k3.v._1, k4.v._1, H / 6.0);
+                output.v._2 = recalculation(output.v._2, k.v._2, k2.v._2, k3.v._2, k4.v._2, H / 6.0);
+                output.v._3 = recalculation(output.v._3, k.v._3, k2.v._3, k3.v._3, k4.v._3, H / 6.0);
 
                 R = Math.Sqrt(Math.Pow(output.pos._1, 2) + Math.Pow(output.pos._2, 2) + Math.Pow(output.pos._3, 2));
                 t = t + H;// сдвигаемся по времени
                           // пересчет шага H
 
-                double K1 = Math.Pow(k.pos._1 / 6 + k2.pos._1 * 2 / 6 - 4 * k3.pos._1 / 6 + k4.pos._1 / 6, 2);
-                double K2 = Math.Pow(k.pos._2 / 6 + k2.pos._2 * 2 / 6 - 4 * k3.pos._2 / 6 + k4.pos._2 / 6, 2);
-                double K3 = Math.Pow(k.pos._3 / 6 + k2.pos._3 * 2 / 6 - 4 * k3.pos._3 / 6 + k4.pos._3 / 6, 2);
+                double K1 = Math.Pow(k.pos._1 / 6.0 + k2.pos._1 * 2 / 6.0 - 4 * k3.pos._1 / 6.0 + k4.pos._1 / 6.0, 2);
+                double K2 = Math.Pow(k.pos._2 / 6.0 + k2.pos._2 * 2 / 6.0 - 4 * k3.pos._2 / 6.0 + k4.pos._2 / 6.0, 2);
+                double K3 = Math.Pow(k.pos._3 / 6.0 + k2.pos._3 * 2 / 6.0 - 4 * k3.pos._3 / 6.0 + k4.pos._3 / 6.0, 2);
                 double Ecal = Math.Abs(H * Math.Pow(K1 + K2 + K3, 0.5));
 
-                H = H * Math.Pow(EpsPresset / Ecal, 0.33333);
+                H = H * Math.Pow(EpsPresset / Ecal, 1/3.0);
                 qqq++;
                 System.Console.WriteLine(H);// отслеживаем шаги
                 textFile.WriteLine(H);//вывод шага
