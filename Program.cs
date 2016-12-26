@@ -292,134 +292,50 @@ namespace ConsoleApplication1
     }
 
 
-    //-----------------------------------------------------------------------------------Старое
+//-----------------------------------------------------------------------------------------------Старое
     class Program
     {
-       
-
-        class Coordinates
+       public double[] Kut(double[] components, double tn, double eps,double h0, DEreader DE405,
+           double jdate)// метод рунгекутта
         {
-            public double[] pos = new double[3], v = new double[3];
-            public Coordinates Clone()
-            {
-                Coordinates c = new Coordinates();
-                c.pos = (double[])pos.Clone();
-                c.v = (double[])v.Clone();
-                return c;
-            }
-
-        }
-
-        const double G = 2.959122082855911025E-4;
-        static double H = 0.001;
-        const double EpsPresset = 1E-8;
-
-
-        static string filePath = "C:\\Users\\Amanda\\Desktop\\coord.txt";
-        static string output = "C:\\Users\\Amanda\\Desktop\\newcoord.txt";
-        static string dora = "C:\\Users\\Amanda\\Desktop\\H.txt";
-        /////  что то с ними не то
-        public static double Koordinata(double V)
-        {
-            return V;
-        }
-
-        public static double Skorost(double x, double R)
-        {
-            return (-G * x) / (R * R * R);
-        }
-
-        static double calcR(Coordinates input, Coordinates k, double h)
-        {
-            return Math.Sqrt(Math.Pow((input.pos[0] + k.pos[0] * h), 2) + Math.Pow((input.pos[1] + k.pos[1] * h), 2) + Math.Pow((input.pos[2] + k.pos[2] * h), 2));
-        }
-        // Основной!!!
-        static Coordinates calc(Coordinates input, double t0, double tn, DEreader DE405, double jdate)
-        {
-            double t = t0;
-            double halfH = H / 2;
-            Coordinates output = input.Clone();
-            Coordinates[] k = new Coordinates[4];
-           
-            Coordinates H2;
-            double qqq = 0;
-         
-            ///// начало цикла
-            System.IO.StreamWriter textFile = new System.IO.StreamWriter(@"C:\\shag.txt");
-            System.IO.StreamWriter File = new System.IO.StreamWriter(@"C:\\radius.txt");
-            System.IO.StreamWriter text = new System.IO.StreamWriter(@"C:\\t.txt");
+            double t = 0;
+            double h = h0;
+            double[] fake = new double[3]; fake[0] = 0; fake[1] = 0; fake[2] = 0;
             while (t < tn)
             {
-                double R = Math.Sqrt(Math.Pow(output.pos[0], 2) + Math.Pow(output.pos[1], 2) + Math.Pow(output.pos[2], 2));
-                if (t + H > tn)
-                { H = tn - t; };
+                if (t + h > tn)
+                { h = tn - t; };
+                double[] k1 = fcn(components, h/2, t, fake,DE405,jdate);
+                double[] k2 = fcn(components, h/2, t,k1, DE405, jdate);
+                double[] k3 = fcn(components, h/2, t,k2, DE405, jdate);
+                double[] k4 = fcn(components, h, t,k3, DE405, jdate);
+                components = newpos(components, k1, k2, k3, k4, h / 6);
+                t += h;
+                // пересчет шага H
 
-                halfH = H / 2;
+                double K1 = Math.Pow(k1[1] / 6 + k2[1] * 2 / 6 - 4 * k3[1] / 6 + k4[1] / 6, 2);
+                double K2 = Math.Pow(k1[2] / 6 + k2[2] * 2 / 6 - 4 * k3[2] / 6 + k4[2] / 6, 2);
+                double K3 = Math.Pow(k1[3] / 6 + k2[3] * 2 / 6 - 4 * k3[3] / 6 + k4[3] / 6, 2);
+                double Ecal = Math.Abs(h * Math.Pow(K1 + K2 + K3, 0.5));
 
-                double[] uH = {1,halfH,halfH,H,0};
-
-                for (int i = 0; i < 4; i++)
-                {
-                    k[i] = new Coordinates();
-                    for (int j = 0; j < 3; j++)
-                    { 
-                        k[i].pos[j] = Koordinata(output.v[j] * uH[i]);   ///Координаты               
-                        k[i].v[j] = Skorost(output.pos[j] * uH[i], R) + Vozmysheniya(t, j, output.pos, DE405, jdate);       /// Скорости
-                    }
-                    R = calcR(output, k[i], uH[i + 1]);
-                }
-                /// Пересчет скоростей и координат
-                output.pos[0] = recalculation(output.pos[0], k[0].pos[0], k[1].pos[0], k[2].pos[0], k[3].pos[0], H / 6.0);
-                output.pos[1] = recalculation(output.pos[1], k[0].pos[1], k[1].pos[1], k[2].pos[1], k[3].pos[1], H / 6.0);
-                output.pos[2] = recalculation(output.pos[2], k[0].pos[2], k[1].pos[2], k[2].pos[2], k[3].pos[2], H / 6.0);
-
-                output.v[0] = recalculation(output.v[0], k[0].v[0], k[1].v[0], k[2].v[0], k[3].v[0], H / 6.0);
-                output.v[1] = recalculation(output.v[1], k[0].v[1], k[1].v[1], k[2].v[1], k[3].v[1], H / 6.0);
-                output.v[2] = recalculation(output.v[2], k[0].v[2], k[1].v[2], k[2].v[2], k[3].v[2], H / 6.0);
-
-           //     R = Math.Sqrt(Math.Pow(output.pos[0], 2) + Math.Pow(output.pos[1], 2) + Math.Pow(output.pos[2], 2));
-                t = t + H;// сдвигаемся по времени
-                          // пересчет шага H
-
-                double K1 = Math.Pow(k[0].pos[0] / 6.0 + k[1].pos[0] * 2 / 6.0 - 4 * k[2].pos[0] / 6.0 + k[3].pos[0] / 6.0, 2);
-                double K2 = Math.Pow(k[0].pos[1] / 6.0 + k[1].pos[1] * 2 / 6.0 - 4 * k[2].pos[1] / 6.0 + k[3].pos[1] / 6.0, 2);
-                double K3 = Math.Pow(k[0].pos[2] / 6.0 + k[1].pos[2] * 2 / 6.0 - 4 * k[2].pos[2] / 6.0 + k[3].pos[2] / 6.0, 2);
-                double Ecal = Math.Abs(H * Math.Pow(K1 + K2 + K3, 0.5));
-
-                H = H * Math.Pow(EpsPresset / Ecal, 1/3.0);
-                qqq++;
-                System.Console.WriteLine(H);// отслеживаем шаги
-                textFile.WriteLine(H);//вывод шага
-                File.WriteLine(R);//вывод гелиоцентрического расстояния
-                text.WriteLine(t);// вывод времени
-
+                h = h * Math.Pow(eps / Ecal, 0.33333);
             }
-            System.Console.WriteLine(t);//конечный момент времени
-            System.Console.WriteLine(qqq);//колличество шагов
-            textFile.Close();
-            File.Close();
-            text.Close();
-            return output;
+            return components;
         }
 
-        //персчет координат и скоростей
-        static double recalculation(double x, double k1, double k2, double k3, double k4, double h)
+        //функция правых частей
+        public double[] fcn(double[] components, double h, double t, double[] fake,DEreader DE405,double jdate)
         {
-            return x + (k1 + 2 * k2 + 2 * k3 + k4) * h;
-        }
-
-        // функция которая считает возмущения
-        public static double Vozmysheniya(double t, int nom, double[] массив_координат_астеройда, DEreader DE405, double jdate)
-        {
-
-            int index = 0;//Планета
+            double G = 2.959122082855911025E-4;
+            //подсчет радиуса
+            double R = Math.Sqrt(Math.Pow((components[0] + fake[0] * h), 2) + Math.Pow((components[1] + fake[1] * h), 2) +
+                Math.Pow((components[2] + fake[2] * h), 2));
+            double[] vektor = new double[6];
+            //часть связаная с возмущениями
             bool geleo = true;//гелео=тру  бари=фолс
-            jdate = jdate + t;//Дата
+            jdate = jdate + t;
             double[] poz = new double[3];//массив куда счит (коор=3) (коор+скор=6)
             double[] Mas = new double[10];//массив где хранятся массы планет
-            double del3;
-            double r3;
-            double G = 2.959122082855911025E-4;
             double EarthDivMoon = 0.813005600000000044E+02;
             Mas[0] = 0.491254745145081187E-10;
             Mas[1] = 0.724345248616270270E-09;
@@ -431,69 +347,63 @@ namespace ConsoleApplication1
             Mas[7] = 0.152435890078427628E-07;
             Mas[8] = 0.218869976542596968E-11;
             Mas[9] = 0.899701134671249882E-09 / (EarthDivMoon + 1);
-            double sum = 0;
-            while (index < 10)
+            //пересчет компонент
+            for (int i = 0; i < 3; i++)
             {
-                DE405.DEreaderGetPlanetPoz(false, jdate, index, geleo, poz);
-                r3 = Math.Pow(poz[0] * poz[0] + poz[1] * poz[1] + poz[2] * poz[2], 0.5);
-                r3 = r3 * r3 * r3;
-                del3 = Math.Pow((массив_координат_астеройда[0] - poz[0]) * (массив_координат_астеройда[0] - poz[0]) +
-                          (массив_координат_астеройда[1] - poz[1]) * (массив_координат_астеройда[1] - poz[1]) +
-                          (массив_координат_астеройда[2] - poz[2]) * (массив_координат_астеройда[2] - poz[2]), 0.5);
-                del3 = del3 * del3 * del3;
-                sum += Mas[index] * ((poz[nom] - массив_координат_астеройда[nom]) / del3 - poz[nom] / r3);
-                index++;
+            vektor[i] = components[i + 3];// определяем позицию
+            double sum = 0;
+            int index = 0;
+            double r3;// расстояние от центра в кубе xj/r^3
+            double del3;// треугольник в кубе, разница позиций планеты и астеройда
+            while (index < 10) //считаем возмущение
+            {
+               DE405.DEreaderGetPlanetPoz(false, jdate, index, geleo, poz);// cчитываем координаты планеты на момент времени
+               r3 = Math.Pow(poz[0] * poz[0] + poz[1] * poz[1] + poz[2] * poz[2], 0.5);
+               r3 = r3 * r3 * r3;
+               del3 = Math.Pow((components[0] - poz[0]) * (components[0] - poz[0]) +
+                     (components[1] - poz[1]) * (components[1] - poz[1]) +
+                     (components[2] - poz[2]) * (components[2] - poz[2]), 0.5);
+               del3 = del3 * del3 * del3;
+               sum += Mas[index] * ((poz[i] - components[i]) / del3 - poz[i] / r3);
+               index++;
             }
-            sum = sum * G;
-            return sum;
+                vektor[i+3]= (-G * components[i]) / (R * R * R)+sum;// скорость +возмущение
+            }
+            return vektor;
         }
+        //персчет координат и скоростей
+        public double[] newpos(double[] components, double[] k1, double[] k2, double[] k3, double[] k4, double h)
+        {
+            double[] vektor = new double[6];
+            for(int i=0; i<6; i++)
+            {
+                vektor[i] = components[i] + (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]) * h;
+            }
+            return vektor;
+        }
+
 
         static void Main(string[] args)
         {
             DEreader DE405 = new DEreader(405, "C: \\Users\\Amanda\\Desktop\\16002200.405");//бинарный файл
-            Coordinates input = new Coordinates();
-            double t0, tn; // начальные данные
             double jdate = 2457700.5;//Дата
+            double[] components = new double[6];
+            double[] otvet= new double[6];
+            double t,h0,tn,eps;
+            h0 = 0.001;
+            eps = 1E-12;
+            tn = 1680;
+            components[0]= 2.43217016648123;
+            components[1] = 1.50652966672052;
+            components[2] = 0.214850898091387;
+            components[3] = -0.00551948749935559;
+            components[4] = 0.00701865011326745;
+            components[5] = 0.00443325211708482;
 
-            //// ввод информации
-            System.Console.WriteLine("Введите t0, а затем tn");
-            bool success = Double.TryParse(System.Console.ReadLine(), out t0);
-            bool success2 = Double.TryParse(System.Console.ReadLine(), out tn);
-            if (!success || !success2)
-            {
-                Console.WriteLine("Не верный ввод данных!");
-                return;
-            }
-            /// считываем координаты из файла
-            using (StreamReader fs = new StreamReader((new FileStream(filePath, FileMode.Open))))
-            {
 
-                input.pos[0] = double.Parse(fs.ReadLine(), CultureInfo.InvariantCulture);
-                input.pos[1] = double.Parse(fs.ReadLine(), CultureInfo.InvariantCulture);
-                input.pos[2] = double.Parse(fs.ReadLine(), CultureInfo.InvariantCulture);
-                input.v[0] = double.Parse(fs.ReadLine(), CultureInfo.InvariantCulture);
-                input.v[1] = double.Parse(fs.ReadLine(), CultureInfo.InvariantCulture);
-                input.v[2] = double.Parse(fs.ReadLine(), CultureInfo.InvariantCulture);
-                Console.WriteLine(input.pos[0]);
-                Console.WriteLine(input.pos[1]);
-                Console.WriteLine(input.pos[2]);
-                Console.WriteLine(input.v[0]);
-                Console.WriteLine(input.v[1]);
-                Console.WriteLine(input.v[2]);
-            }
 
-            input = calc(input, t0, tn, DE405, jdate); //запускаем программу на счет
 
-            // выводим результат
-            using (StreamWriter sw = new StreamWriter(new FileStream(output, FileMode.Create)))
-            {
-                sw.WriteLine("x=" + input.pos[0]);
-                sw.WriteLine("y=" + input.pos[1]);
-                sw.WriteLine("z=" + input.pos[2]);
-                sw.WriteLine("Vx=" + input.v[0]);
-                sw.WriteLine("Vy=" + input.v[1]);
-                sw.WriteLine("Vz=" + input.v[2]);
-            }
+            otvet =Kut(components, tn, eps, h0, DE405, jdate);
 
             Console.ReadLine();
         }
